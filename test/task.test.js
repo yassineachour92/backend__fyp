@@ -1,48 +1,44 @@
 // let chai = require("chai");
 // let chaiHttp = require("chai-http")
 // let server = require("../index.js");
-const request = require('supertest')
 const app = require('../index')
+const Users = require('./../models/Users.js');
+
+const mongoose = require("mongoose");
+const supertest = require("supertest");
+
+beforeEach((done) => {
+    mongoose.connect("mongodb://localhost:27017/clients",
+      { useNewUrlParser: true, useUnifiedTopology: true },
+      () => done());
+  });
+  
+  afterEach((done) => {
+    mongoose.connection.db.dropDatabase(() => {
+      mongoose.connection.close(() => done())
+    });
+  });
+  
+test("GET /users/", async () => {
+    const post = await Users.create({ firstName: "Post 1", email: "Lorem ipsum" ,phone:"123",password:"123"});
+  
+    await supertest(app).get("/users/")
+      .expect(200)
+      .then((response) => {
+        // Check type and length
+        expect(Array.isArray(response.body)).toBeTruthy();
+        expect(response.body.length).toEqual(1);
+  
+        // Check data
+        expect(response.body[0]._id).toBe(post.id);
+        expect(response.body[0].firstName).toBe(post.firstName);
+        expect(response.body[0].email).toBe(post.email);
+      });
+  });
 
 
-const userExmaple = {
-    firstName: "test",
-    lastName: "user",
-    email: "testuser@gmail.com",
-    password: "123456",
-    role: ["admin", "client"]
-}
-
-const testLogin = async (email, password) => {
-    const res = await request(app).post('/users/login')
-        .send({
-            email,
-            password,
-        })
-    // expect(res.statusCode).toEqual(200)
-    this.token = res.body.token
-    return res
-}
 
 
-module.exports = {
-    testLogin,
-    userExmaple,
-    // createUser
-}
 
 
-// chai.should();
-// chai.use(chaiHttp);
-// describe('Tasks Api',()=> {
-// it("It should GET all the tasks",(done)=>{
-//     chai.request(server)
-//     .get("/users/")
-//     .end((err,response)=>{
-//         response.should.have.status(200);
-//         response.body.should.be.a('array');
-//     })
-// })
-
-// });
 

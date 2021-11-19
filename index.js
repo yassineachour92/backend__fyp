@@ -33,3 +33,5 @@ app.use('/users', usersRoutes);
 app.listen(PORT, async () => {
     console.log('localhost:5000 on');
 })
+
+module.exports = app
